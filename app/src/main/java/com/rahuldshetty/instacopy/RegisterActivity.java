@@ -11,11 +11,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.rahuldshetty.instacopy.utils.utility;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -27,6 +36,8 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private FirebaseFirestoreSettings settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +46,16 @@ public class RegisterActivity extends AppCompatActivity {
 
         FirebaseApp.initializeApp(this);
         mAuth=FirebaseAuth.getInstance();
+
+
+
+        settings = new FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build();
+
+
+        db=FirebaseFirestore.getInstance();
+        db.setFirestoreSettings(settings);
 
         usernameField=findViewById(R.id.register_username);
         nameField=findViewById(R.id.register_fname);
@@ -60,11 +81,11 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                String username=usernameField.getText().toString();
-                String name=nameField.getText().toString();
+                final String username=usernameField.getText().toString();
+                final String name=nameField.getText().toString();
                 String pass=passField.getText().toString();
                 String cpass=cpassField.getText().toString();
-                String email=emailField.getText().toString();
+                final String email=emailField.getText().toString();
 
                 if(!TextUtils.isEmpty(username) && !TextUtils.isEmpty(name) && !TextUtils.isEmpty(pass) && !TextUtils.isEmpty(cpass) && !TextUtils.isEmpty(email))
                 {
@@ -85,9 +106,36 @@ public class RegisterActivity extends AppCompatActivity {
                                     if(task.isSuccessful())
                                     {
 
-                                        // TODO : ADD TO FIRESTORE
+                                        FirebaseUser mCurrentUser = mAuth.getCurrentUser();
 
-                                        goToHome();
+                                        // TODO : ADD TO FIRESTORE
+                                        Map<String ,String> hashmap=new HashMap<>();
+                                        hashmap.put("username",username);
+                                        hashmap.put("name",name);
+                                        hashmap.put("email",email);
+
+                                        db.collection("USERS")
+                                                .document("USERS")
+                                                .collection(mCurrentUser.getUid())
+                                                .add(hashmap)
+                                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentReference documentReference) {
+                                                        goToHome();
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Utils.makeToast(RegisterActivity.this,"Failed to add to database....");
+                                                    }
+                                                })
+                                        ;
+
+
+
+
+
                                     }
                                     else{
                                         Utils.makeToast(RegisterActivity.this,"Failed to register....");

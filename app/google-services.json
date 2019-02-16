@@ -1,27 +1,35 @@
 {
   "project_info": {
-    "project_number": "569486966657",
-    "firebase_url": "https://test-237dd.firebaseio.com",
-    "project_id": "test-237dd",
-    "storage_bucket": "test-237dd.appspot.com"
+    "project_number": "612163638332",
+    "firebase_url": "https://instacopy-d3677.firebaseio.com",
+    "project_id": "instacopy-d3677",
+    "storage_bucket": "instacopy-d3677.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:569486966657:android:c8f5348f34cdaeb8",
+        "mobilesdk_app_id": "1:612163638332:android:c8f5348f34cdaeb8",
         "android_client_info": {
           "package_name": "com.rahuldshetty.instacopy"
         }
       },
       "oauth_client": [
         {
-          "client_id": "569486966657-ag433rbsjop06v8nrblr73k1siru2vc2.apps.googleusercontent.com",
+          "client_id": "612163638332-vfuj5tiencpksco4e2kstco5u6kf9dp6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rahuldshetty.instacopy",
+            "certificate_hash": "db4469809cc87602b96842f160376e5bbd2d6bee"
+          }
+        },
+        {
+          "client_id": "612163638332-hg7auakmi4aemhrqu66e1vrsaqd4i5b4.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyACN0-INCX7tmzHUq_QKjnpjjoysTH6q-E"
+          "current_key": "AIzaSyAnyDbhNL1FEVMzFO7pPBXeeh3NGKBBc6s"
         }
       ],
       "services": {
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "612163638332-hg7auakmi4aemhrqu66e1vrsaqd4i5b4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
