@@ -113,24 +113,24 @@ public class RegisterActivity extends AppCompatActivity {
                                         hashmap.put("username",username);
                                         hashmap.put("name",name);
                                         hashmap.put("email",email);
+                                        hashmap.put("photourl","");
+                                        hashmap.put("desc","");
 
                                         db.collection("USERS")
-                                                .document("USERS")
-                                                .collection(mCurrentUser.getUid())
-                                                .add(hashmap)
-                                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                .document(mCurrentUser.getUid())
+                                                .set(hashmap)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
-                                                    public void onSuccess(DocumentReference documentReference) {
-                                                        goToHome();
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if(task.isSuccessful())
+                                                        {
+                                                            goToHome();
+                                                        }
+                                                        else{
+                                                            Utils.makeToast(RegisterActivity.this,"Failed to add to database....");
+                                                        }
                                                     }
-                                                })
-                                                .addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Utils.makeToast(RegisterActivity.this,"Failed to add to database....");
-                                                    }
-                                                })
-                                        ;
+                                                });
 
 
 

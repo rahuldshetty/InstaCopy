@@ -8,6 +8,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNavigationView;
     FrameLayout frameLayout;
+    Toolbar toolbar;
 
     Fragment homeFragment,cameraFragment,profileFragment,searchFragment,notifFragment;
 
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView=findViewById(R.id.bottomNavigationView);
         frameLayout=findViewById(R.id.home_frame);
+        toolbar=findViewById(R.id.main_toolbar);
 
         homeFragment=new HomeFragment();
         cameraFragment=new CameraFragment();
@@ -46,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
         searchFragment=new SearchFragment();
         notifFragment=new NotificationFragment();
 
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("");
 
         bottomNavigationView.setSelectedItemId(R.id.bottomnav_home);
         loadFragment(homeFragment);
@@ -77,6 +84,31 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId())
+        {
+            case R.id.toolbar_edit:
+                Intent activity=new Intent(MainActivity.this,EditActivity.class);
+                startActivity(activity);
+                return true;
+
+            case R.id.toolbar_logout:
+                mAuth.signOut();
+                finish();
+                startActivity(getIntent());
+                return false;
+
+            default:return false;
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbatitems,menu);
+        return true;
     }
 
     void loadFragment(Fragment fragment)
