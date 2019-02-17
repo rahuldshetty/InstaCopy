@@ -49,13 +49,10 @@ public class RegisterActivity extends AppCompatActivity {
 
 
 
-        settings = new FirebaseFirestoreSettings.Builder()
-                .setTimestampsInSnapshotsEnabled(true)
-                .build();
+
 
 
         db=FirebaseFirestore.getInstance();
-        db.setFirestoreSettings(settings);
 
         usernameField=findViewById(R.id.register_username);
         nameField=findViewById(R.id.register_fname);

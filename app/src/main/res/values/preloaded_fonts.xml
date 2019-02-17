@@ -2,6 +2,10 @@
 <resources>
     <array name="preloaded_fonts" translatable="false">
         <item>@font/dawning_of_a_new_day</item>
+        <item>@font/ntr</item>
+        <item>@font/roboto_condensed_bold</item>
+        <item>@font/roboto_medium</item>
+        <item>@font/roboto_thin_italic</item>
         <item>@font/satisfy</item>
     </array>
 </resources>

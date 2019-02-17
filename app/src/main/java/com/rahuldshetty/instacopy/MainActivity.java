@@ -1,5 +1,6 @@
 package com.rahuldshetty.instacopy;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -13,23 +14,39 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.rahuldshetty.instacopy.Frames.CameraFragment;
 import com.rahuldshetty.instacopy.Frames.HomeFragment;
 import com.rahuldshetty.instacopy.Frames.NotificationFragment;
 import com.rahuldshetty.instacopy.Frames.ProfileFragment;
 import com.rahuldshetty.instacopy.Frames.SearchFragment;
+import com.rahuldshetty.instacopy.models.User;
+import com.rahuldshetty.instacopy.utils.utility;
 
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseUser mCurrentUser;
 
+    public static String profileName;
+    public static Context mainContext;
+
     BottomNavigationView bottomNavigationView;
     FrameLayout frameLayout;
     Toolbar toolbar;
+
+    public  static MainActivity mainActivity;
+
+    private FirebaseFirestore db;
+
+    utility Utility;
 
     Fragment homeFragment,cameraFragment,profileFragment,searchFragment,notifFragment;
 
@@ -39,17 +56,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         FirebaseApp.initializeApp(this);
         mAuth=FirebaseAuth.getInstance();
+        db=FirebaseFirestore.getInstance();
 
         bottomNavigationView=findViewById(R.id.bottomNavigationView);
         frameLayout=findViewById(R.id.home_frame);
         toolbar=findViewById(R.id.main_toolbar);
 
+        Utility=new utility();
         homeFragment=new HomeFragment();
         cameraFragment=new CameraFragment();
         profileFragment=new ProfileFragment();
         searchFragment=new SearchFragment();
         notifFragment=new NotificationFragment();
 
+        mainActivity=this;
+
+
+        mainContext=this;
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
@@ -76,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                         loadFragment(notifFragment);
                         return true;
                     case R.id.bottomnav_profile:
+                        profileName=mCurrentUser.getUid();
                         loadFragment(profileFragment);
                         return true;
                 }
@@ -111,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    void loadFragment(Fragment fragment)
+    public void loadFragment(Fragment fragment)
     {
         FragmentManager fragmentManager=getSupportFragmentManager();
         FragmentTransaction transaction=fragmentManager.beginTransaction();
@@ -120,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
 
     }
+
+
 
     @Override
     protected void onStart() {
@@ -133,6 +159,44 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         }
+
+    }
+
+    public void loadProfileFragment(final String username) {
+
+        db.collection("USERS")
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                        for(DocumentSnapshot documentSnapshot:queryDocumentSnapshots.getDocuments())
+                        {
+
+                            User user=documentSnapshot.toObject(User.class);
+                            if(user.getUsername().toLowerCase().matches(username.toLowerCase()))
+                            {
+
+                                profileName=documentSnapshot.getId();
+                                FragmentManager fragmentManager=getSupportFragmentManager();
+                                FragmentTransaction transaction=fragmentManager.beginTransaction();
+                                transaction.replace(R.id.home_frame,profileFragment);
+                                transaction.addToBackStack(null);
+                                transaction.commit();
+                                return;
+                            }
+                        }
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Utility.makeToast(MainActivity.this,"Failed to load data...");
+                    }
+                })
+        ;
+
 
     }
 }
