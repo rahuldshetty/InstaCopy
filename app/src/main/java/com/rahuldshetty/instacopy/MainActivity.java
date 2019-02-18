@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseUser mCurrentUser;
 
-    public static String profileName;
+    public static String profileName; //  UID of the person to open profile
     public static Context mainContext;
 
     BottomNavigationView bottomNavigationView;
