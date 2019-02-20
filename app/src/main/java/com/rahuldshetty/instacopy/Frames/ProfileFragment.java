@@ -16,16 +16,24 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.rahuldshetty.instacopy.EditActivity;
 import com.rahuldshetty.instacopy.MainActivity;
 import com.rahuldshetty.instacopy.R;
+import com.rahuldshetty.instacopy.models.Follow;
 import com.rahuldshetty.instacopy.models.User;
 import com.rahuldshetty.instacopy.utils.utility;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -84,7 +92,39 @@ public class ProfileFragment extends Fragment {
             mainBtn.setText("Edit Profile");
         }
         else{
-            //TODO: get follow status and update
+            db.collection("FOLLOW")
+                    .document(mAuth.getCurrentUser().getUid())
+                    .collection(MainActivity.profileName)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            if(queryDocumentSnapshots.getDocuments().size()==0)
+                            {
+                                mainBtn.setText("Follow");
+
+                            }
+                            else {
+                                DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                                String status = documentSnapshot.getString("status");
+                                if (status.equals("NOT FOLLOWING")) {
+                                    mainBtn.setText("Follow");
+                                }
+                                else {
+                                    mainBtn.setText("UnFollow");
+
+                                }
+
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Utility.makeToast(MainActivity.mainContext,"Failed to load..");
+                        }
+                    })
+            ;
 
 
         }
@@ -98,8 +138,51 @@ public class ProfileFragment extends Fragment {
                     startActivity(edit);
                 }
                 else{
+                    Map<String,String> map=new HashMap<>();
                     //TODO : FOLLOW OR UNFOLLOW
+                    if(mainBtn.getText().equals("Follow"))
+                    {
+                        map.put("status","FOLLOWING");
+                        db.collection("FOLLOW")
+                                .document(mAuth.getCurrentUser().getUid())
+                                .collection(MainActivity.profileName)
+                                .document("FOLLOWCOLLECTION")
+                                .set(map)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful())
+                                        {
+                                            mainBtn.setText("UnFollow");
+                                        }
+                                        else{
+                                            Utility.makeToast(MainActivity.mainContext,"Failed to send data...");
+                                        }
+                                    }
+                                });
 
+                    }
+                    else{
+                        map.put("status","NOT FOLLOWING");
+                        db.collection("FOLLOW")
+                                .document(mAuth.getCurrentUser().getUid())
+                                .collection(MainActivity.profileName)
+                                .document("FOLLOWCOLLECTION")
+                                .set(map)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful())
+                                        {
+                                            mainBtn.setText("Follow");
+                                        }
+                                        else{
+                                            Utility.makeToast(MainActivity.mainContext,"Failed to send data...");
+                                        }
+                                    }
+                                });
+
+                    }
                 }
 
             }
@@ -127,6 +210,7 @@ public class ProfileFragment extends Fragment {
                         username.setText("@"+user.getUsername());
                         desc.setText(user.getDesc());
 
+                        progressBar.setVisibility(View.INVISIBLE);
                         // TODO : Getting each posts
                         // TODO : Getting followers count
                         // TODO : Getting following count

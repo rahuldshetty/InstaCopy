@@ -69,7 +69,7 @@ public class SearchFragment extends Fragment {
             searchView = mView.findViewById(R.id.searchView);
             recyclerView = mView.findViewById(R.id.search_recyclerView);
 
-            userList = new ArrayList<User>();
+            userList = new ArrayList<>();
             adapter = new SearchAdapter(userList);
 
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -100,9 +100,8 @@ public class SearchFragment extends Fragment {
                             .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                                 @Override
                                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-                                    adapter.notifyItemRangeRemoved(0, userList.size());
                                     userList.clear();
+                                    adapter.notifyItemRangeRemoved(0,userList.size()-1);
                                     for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
                                         User temp = (documentSnapshot.toObject(User.class));
                                         if (temp.getName().toLowerCase().matches(".*" + s.toLowerCase() + ".*") || temp.getUsername().toLowerCase().matches(".*" + s.toLowerCase() + ".*")) {
@@ -110,7 +109,6 @@ public class SearchFragment extends Fragment {
                                         }
 
                                     }
-
                                     adapter.notifyDataSetChanged();
 
 
@@ -137,6 +135,8 @@ public class SearchFragment extends Fragment {
         else{
 
         }
+
+
         return _rootView;
     }
 

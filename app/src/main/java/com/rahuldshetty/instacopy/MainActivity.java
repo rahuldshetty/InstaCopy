@@ -30,6 +30,9 @@ import com.rahuldshetty.instacopy.Frames.SearchFragment;
 import com.rahuldshetty.instacopy.models.User;
 import com.rahuldshetty.instacopy.utils.utility;
 
+import java.util.ArrayList;
+import java.util.Queue;
+
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -45,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
     public  static MainActivity mainActivity;
 
     private FirebaseFirestore db;
+
+
+    ArrayList<Integer> queue;
 
     utility Utility;
 
@@ -69,6 +75,10 @@ public class MainActivity extends AppCompatActivity {
         searchFragment=new SearchFragment();
         notifFragment=new NotificationFragment();
 
+        queue=new ArrayList<Integer>();
+        queue.add(R.id.bottomnav_home);
+        queue.add(R.id.bottomnav_home);
+
         mainActivity=this;
 
 
@@ -87,18 +97,23 @@ public class MainActivity extends AppCompatActivity {
                 {
 
                     case R.id.bottomnav_home:
+                        queue.add(R.id.bottomnav_home);
                         loadFragment(homeFragment);
                         return true;
                     case R.id.bottomnav_search:
+                        queue.add(R.id.bottomnav_search);
                         loadFragment(searchFragment);
                         return true;
                     case R.id.bottomnav_camera:
+                        queue.add(R.id.bottomnav_camera);
                         loadFragment(cameraFragment);
                         return true;
                     case R.id.bottomnav_notif:
+                        queue.add(R.id.bottomnav_notif);
                         loadFragment(notifFragment);
                         return true;
                     case R.id.bottomnav_profile:
+                        queue.add(R.id.bottomnav_profile);
                         profileName=mCurrentUser.getUid();
                         loadFragment(profileFragment);
                         return true;
@@ -162,7 +177,40 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void loadProfileFragment(final String username) {
+    @Override
+    public void onBackPressed() {
+        int count = getFragmentManager().getBackStackEntryCount();
+        if (count == 0) {
+            super.onBackPressed();
+            //additional code
+            if(queue.size()!=0)
+            {
+
+                queue.remove(queue.size()-1);
+
+                if(queue.size()==0)
+                {
+                    finish();
+                }
+                else {
+                    int top = queue.get(queue.size() - 1);
+                    bottomNavigationView.setSelectedItemId(top);
+                    queue.remove(queue.size() - 1);
+
+                }
+
+            }
+
+        } else {
+            getFragmentManager().popBackStack();
+        }
+    }
+
+
+    public void loadProfileFragment(String username) {
+
+        final String uname = username;
+
 
         db.collection("USERS")
                 .get()
@@ -174,13 +222,14 @@ public class MainActivity extends AppCompatActivity {
                         {
 
                             User user=documentSnapshot.toObject(User.class);
-                            if(user.getUsername().toLowerCase().matches(username.toLowerCase()))
+                            if(user.getUsername().equals(uname))
                             {
 
                                 profileName=documentSnapshot.getId();
                                 FragmentManager fragmentManager=getSupportFragmentManager();
                                 FragmentTransaction transaction=fragmentManager.beginTransaction();
-                                transaction.replace(R.id.home_frame,profileFragment);
+                                ProfileFragment newPF = new ProfileFragment();
+                                transaction.replace(R.id.home_frame,newPF);
                                 transaction.addToBackStack(null);
                                 transaction.commit();
                                 return;
@@ -199,4 +248,5 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
 }

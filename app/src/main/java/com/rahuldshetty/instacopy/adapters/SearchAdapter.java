@@ -14,6 +14,7 @@ import com.rahuldshetty.instacopy.EditActivity;
 import com.rahuldshetty.instacopy.MainActivity;
 import com.rahuldshetty.instacopy.R;
 import com.rahuldshetty.instacopy.models.User;
+import com.rahuldshetty.instacopy.utils.utility;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHolder> {
 
-    private List<User> userList;
+    public List<User> userList;
 
     public SearchAdapter(List<User> userList)
     {
@@ -29,7 +30,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
     }
 
 
-    public class MyViewHolder extends RecyclerView.ViewHolder{
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         public TextView name,username;
         public CircleImageView circleImageView;
@@ -39,22 +40,33 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
             name=itemView.findViewById(R.id.singleitemfullname);
             username=itemView.findViewById(R.id.singleitemusername);
             circleImageView=itemView.findViewById(R.id.singleitemimageview);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            User userGlob=userList.get(getAdapterPosition());
+            MainActivity.mainActivity.loadProfileFragment(userGlob.getUsername());
+
         }
     }
 
     @NonNull
     @Override
-    public SearchAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,final int i) {
+    public SearchAdapter.MyViewHolder onCreateViewHolder(@NonNull final ViewGroup viewGroup, int i) {
         View view= LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.singlesearchitem,viewGroup,false);
 
+
+
+        /*
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.mainActivity.loadProfileFragment(userList.get(i).getUsername());
 
             }
         });
+        */
 
         return new MyViewHolder(view);
     }
