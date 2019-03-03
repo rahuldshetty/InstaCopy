@@ -9,7 +9,9 @@ import android.support.v7.widget.GridLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,15 +26,21 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.rahuldshetty.instacopy.EditActivity;
 import com.rahuldshetty.instacopy.MainActivity;
+import com.rahuldshetty.instacopy.PostActivity;
 import com.rahuldshetty.instacopy.R;
+import com.rahuldshetty.instacopy.adapters.GridAdapter;
 import com.rahuldshetty.instacopy.models.Follow;
+import com.rahuldshetty.instacopy.models.Post;
 import com.rahuldshetty.instacopy.models.User;
 import com.rahuldshetty.instacopy.utils.utility;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -49,12 +57,18 @@ public class ProfileFragment extends Fragment {
     TextView name,username,desc,postCount,folingCount,folwCount;
     Button mainBtn;
     ProgressBar progressBar;
-    GridLayout gridLayout;
+    GridView gridLayout;
 
+
+    GridAdapter adapter;
     utility Utility;
+
+    private List<Post> postList;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+
+    private ArrayList<DocumentReference> docList;
 
 
     public ProfileFragment() {
@@ -79,7 +93,27 @@ public class ProfileFragment extends Fragment {
         folwCount=mView.findViewById(R.id.profileFollowersCount);
         mainBtn=mView.findViewById(R.id.profile_Btn);
         progressBar=mView.findViewById(R.id.profile_progressbar);
-        gridLayout=mView.findViewById(R.id.gridLayout);
+        gridLayout=mView.findViewById(R.id.gridView);
+
+        docList=new ArrayList<DocumentReference>();
+
+        postList=new ArrayList<Post>();
+
+        adapter=new GridAdapter(this.getContext(),postList);
+        gridLayout.setAdapter(adapter);
+
+        gridLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //TODO : TRANSFER TO POST
+                Intent act=new Intent(MainActivity.mainContext, PostActivity.class);
+                act.putExtra("POST_UID",MainActivity.profileName);
+                act.putExtra("POST_DocID",docList.get(position).getId());
+                startActivity(act);
+
+
+            }
+        });
 
         mAuth=FirebaseAuth.getInstance();
         db=FirebaseFirestore.getInstance();
@@ -139,7 +173,6 @@ public class ProfileFragment extends Fragment {
                 }
                 else{
                     Map<String,String> map=new HashMap<>();
-                    //TODO : FOLLOW OR UNFOLLOW
                     if(mainBtn.getText().equals("Follow"))
                     {
                         map.put("status","FOLLOWING");
@@ -195,7 +228,7 @@ public class ProfileFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    public void onSuccess(final DocumentSnapshot documentSnapshot) {
 
                         User user=documentSnapshot.toObject(User.class);
                         if(user.getPhotourl()!="")
@@ -210,11 +243,36 @@ public class ProfileFragment extends Fragment {
                         username.setText("@"+user.getUsername());
                         desc.setText(user.getDesc());
 
-                        progressBar.setVisibility(View.INVISIBLE);
-                        // TODO : Getting each posts
+
                         // TODO : Getting followers count
                         // TODO : Getting following count
 
+                        db.collection("POSTS")
+                                .document(MainActivity.profileName)
+                                .collection("SUBPOST")
+                                .orderBy("timestamp", Query.Direction.DESCENDING)
+                                .get()
+                                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            postList.clear();
+                                            for(DocumentSnapshot docs:queryDocumentSnapshots.getDocuments())
+                                            {
+                                                docList.add(docs.getReference());
+                                                Post post=docs.toObject(Post.class);
+                                                postList.add(post);
+                                            }
+                                            adapter.notifyDataSetChanged();
+                                            progressBar.setVisibility(View.INVISIBLE);
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Utility.makeToast(MainActivity.mainContext,"Failed to load posts...");
+                                        progressBar.setVisibility(View.INVISIBLE);
+                                    }
+                                });
 
 
 

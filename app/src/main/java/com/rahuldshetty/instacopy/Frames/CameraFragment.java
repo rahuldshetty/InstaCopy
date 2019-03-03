@@ -106,7 +106,7 @@ public class CameraFragment extends Fragment {
                 final String titleText = title.getText().toString();
                 final String descText = desc.getText().toString();
 
-                if(!TextUtils.isEmpty(titleText) && !TextUtils.isEmpty(descText))
+                if(!TextUtils.isEmpty(titleText) && !TextUtils.isEmpty(descText) && imageURI!=null)
                 {
                     StorageReference storageReference=firebaseStorage.getReference();
 
@@ -140,9 +140,13 @@ public class CameraFragment extends Fragment {
                                                             title.setText("");
                                                             desc.setText("");
                                                             imageView.setImageURI(null);
+                                                            imageURI=null;
 
+                                                            String DocID = task.getResult().getId();
 
                                                             Intent act=new Intent(MainActivity.mainContext, PostActivity.class);
+                                                            act.putExtra("POST_UID",mAuth.getCurrentUser().getUid());
+                                                            act.putExtra("POST_DocID",DocID);
                                                             startActivity(act);
                                                         }
                                                         else{
